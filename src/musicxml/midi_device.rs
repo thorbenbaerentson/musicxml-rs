@@ -1,12 +1,12 @@
-use crate::musicxml::measure::Measure;
-use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use crate::prelude::*;
+
 #[derive(Debug, Serialize, Deserialize, Default)]
-pub struct Part {
+pub struct MidiDevice {
     #[serde(default = "String::default")]
     pub id: String,
 
-    #[serde(default = "Vec::default")]
-    pub measures: Vec<Measure>,
+    #[serde(default = "u8::default")]
+    pub port: u8,
 }

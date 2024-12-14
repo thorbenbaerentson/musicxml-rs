@@ -1,26 +1,85 @@
 use crate::prelude::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Attributes {
+    #[serde(default = "Option::default")]
     pub divisions: Option<usize>,
+    #[serde(default = "Option::default")]
     pub staves: Option<u8>,
+    #[serde(default = "Option::default")]
     pub key: Option<Key>,
+    #[serde(default = "Option::default")]
     pub time: Option<Time>,
+    #[serde(default = "Option::default")]
     pub clef: Option<Clef>,
 }
-#[derive(Debug)]
-pub struct Key {
-    fifths: i8,
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd, Default)]
+pub enum KeyMode {
+    #[serde(rename = "none")]
+    #[default]
+    None,
+
+    #[serde(rename = "major")]
+    Mayjor,
+
+    #[serde(rename = "minor")]
+    Minor,
+
+    #[serde(rename = "dorian")]
+    Dorian,
+
+    #[serde(rename = "phrygian")]
+    Phrygian,
+
+    #[serde(rename = "lydian")]
+    Lydian,
+
+    #[serde(rename = "mixolydian")]
+    Mixolydian,
+
+    #[serde(rename = "aeolian")]
+    Aeolian,
+
+    #[serde(rename = "ionian")]
+    Ionian,
+
+    #[serde(rename = "locrian")]
+    Locrian,
 }
-#[derive(Debug)]
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Key {
+    #[serde(default = "i8::default")]
+    number: i8,
+
+    #[serde(default = "i8::default")]
+    fifths: i8,
+
+    #[serde(default = "KeyMode::default")]
+    mode: KeyMode,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Time {
+    #[serde(default = "u8::default")]
     beats: u8,
+
+    #[serde(default = "u8::default", rename = "beat-type")]
     beat_type: u8,
 }
-#[derive(Debug)]
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Clef {
+    #[serde(default = "char::default")]
     sign: char,
+
+    #[serde(default = "i8::default")]
     line: i8,
+
+    #[serde(default = "i8::default")]
+    number: i8,
 }
 
 impl Attributes {
@@ -35,158 +94,50 @@ impl Attributes {
     }
 }
 
-pub fn parse_attributes(el: Node) -> Result<Attributes> {
-    let mut divisions: Option<usize> = None;
-    let mut staves: Option<u8> = None;
-    let mut key: Option<Key> = None;
-    let mut time: Option<Time> = None;
-    let mut clef: Option<Clef> = None;
+#[cfg(test)]
+mod tests {
+    use crate::musicxml::attributes::KeyMode;
+    use serde_xml_rs::from_str;
 
-    // return Err(UnknownAttribute(format!("XXXX element: {}", attr.name())).into());
+    use super::Attributes;
 
-    for child in el.children() {
-        let child_name = child.tag_name().name();
+    #[test]
+    fn attributes() {
+        let xml = r#"
+            <attributes>
+                <divisions>4</divisions>
+                <key number="1">
+                    <fifths>0</fifths>
+                    <mode>none</mode>
+                </key>
+                <time>
+                    <beats>4</beats>
+                    <beat-type>4</beat-type>
+                </time>
+                <staves>1</staves>
+                <clef number="1">
+                    <sign>G</sign>
+                    <line>2</line>
+                </clef>
+            </attributes>"#;
 
-        match child_name {
-            "divisions" => {
-                for item in child.children() {
-                    match item.node_type() {
-                        NodeType::Text => {
-                            if let Some(x) = item.text() {
-                                divisions = Some(x.parse().unwrap_or(0));
-                            }
-                        }
-                        _ => {}
-                    }
-                }
-            }
-            "staves" => {
-                for item in child.children() {
-                    match item.node_type() {
-                        NodeType::Text => {
-                            if let Some(x) = item.text() {
-                                staves = Some(x.parse().unwrap_or(0));
-                            }
-                        }
-                        _ => {}
-                    }
-                }
-            }
-            "key" => {
-                key = parse_option_key(child)?;
-            }
-            "time" => {
-                time = parse_option_time(child)?;
-            }
-            "clef" => {
-                clef = parse_option_clef(child)?;
-            }
-            "" => {}
-            _ => {
-                println!("UNKNOWN attributes child: {}", child_name);
-                return Err(UnknownElement(format!("attributes element: {child_name}")).into());
-            }
-        }
+        let attribs: Attributes = from_str(xml).unwrap();
+
+        assert_eq!(attribs.divisions, Some(4));
+        assert_eq!(attribs.staves, Some(1));
+
+        let key = attribs.key.unwrap();
+        assert_eq!(key.number, 1);
+        assert_eq!(key.fifths, 0);
+        assert_eq!(key.mode, KeyMode::None);
+
+        let time = attribs.time.unwrap();
+        assert_eq!(time.beats, 4);
+        assert_eq!(time.beat_type, 4);
+
+        let clef = attribs.clef.unwrap();
+        assert_eq!(clef.sign, 'G');
+        assert_eq!(clef.line, 2);
+        assert_eq!(clef.number, 1);
     }
-    Ok(Attributes {
-        divisions,
-        staves,
-        key,
-        time,
-        clef,
-    })
-}
-
-pub fn parse_option_key(el: Node) -> Result<Option<Key>> {
-    let mut key: Option<Key> = None;
-    for child in el.children() {
-        let child_name = child.tag_name().name();
-        match child_name {
-            "fifths" => {
-                if let Some(x) = child.text() {
-                    if let Ok(d) = x.parse() {
-                        key = Some(Key { fifths: d });
-                    }
-                }
-            }
-            "mode" => {
-                println!("unimplemented key child {}", child_name);
-            }
-            "" => {}
-            _ => {
-                println!("UNKNOWN key child: {}", child_name);
-                return Err(UnknownElement(format!("key element: {child_name}")).into());
-            }
-        }
-    }
-    Ok(key)
-}
-
-/*
-       <key number="1">
-         <fifths>2</fifths>
-         <mode>major</mode>
-       </key>
-*/
-
-pub fn parse_option_time(el: Node) -> Result<Option<Time>> {
-    let mut beats: u8 = 0;
-    let mut beat_type: u8 = 0;
-    for child in el.children() {
-        let child_name = child.tag_name().name();
-        match child_name {
-            "beats" => {
-                if let Some(x) = child.text() {
-                    if let Ok(d) = x.parse() {
-                        beats = d;
-                    }
-                }
-            }
-            "beat-type" => {
-                if let Some(x) = child.text() {
-                    if let Ok(d) = x.parse() {
-                        beat_type = d;
-                    }
-                }
-            }
-
-            "" => {}
-            _ => {
-                println!("UNKNOWN time child: {}", child_name);
-                return Err(UnknownElement(format!("time element: {child_name}")).into());
-            }
-        }
-    }
-
-    Ok(Some(Time { beats, beat_type }))
-}
-
-pub fn parse_option_clef(el: Node) -> Result<Option<Clef>> {
-    let mut sign: char = 'G';
-    let mut line: i8 = 0;
-    for child in el.children() {
-        let child_name = child.tag_name().name();
-        match child_name {
-            "sign" => {
-                let text = child.text();
-                if let Some(t) = text {
-                    sign = t.chars().next().unwrap();
-                }
-            }
-            "line" => {
-                let text = child.text();
-                if let Some(x) = text {
-                    if let Ok(d) = x.parse() {
-                        line = d;
-                    }
-                }
-            }
-            "" => {}
-            _ => {
-                println!("UNKNOWN clef child {}", child_name);
-                return Err(UnknownElement(format!("clef element: {child_name}")).into());
-            }
-        }
-    }
-    Ok(Some(Clef { sign, line }))
 }

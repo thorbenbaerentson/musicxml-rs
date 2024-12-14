@@ -1,33 +1,45 @@
 use crate::prelude::*;
 
-use self::scorepartwise::ScorePartwise;
+use self::score_partwise::ScorePartwise;
 
 pub mod articulations;
 pub mod attributes;
+pub mod backup;
 pub mod barline;
 pub mod core;
 pub mod credit;
 pub mod defaults;
 pub mod direction;
+pub mod forward;
 pub mod harmony;
 pub mod identification;
+pub mod left_right_middle;
+pub mod level;
 pub mod lyric;
 pub mod measure;
-pub mod mididevice;
-pub mod midiinstrument;
+pub mod midi_device;
+pub mod midi_instrument;
 pub mod notations;
 pub mod note;
+pub mod page_layout;
+pub mod page_margins;
 pub mod part;
 pub mod pitch;
-pub mod scoreinstrument;
-pub mod scorepart;
-pub mod scorepartwise;
+pub mod print;
+pub mod score_instrument;
+pub mod score_part;
+pub mod score_partwise;
+pub mod start_stop_continue;
+pub mod start_stop_single;
+pub mod stem;
+pub mod symbol_size;
+pub mod system_divider;
+pub mod system_layout;
+pub mod printable_value;
 pub mod work;
-
-//-----------------------------
-pub fn parse(xml: String) -> Result<ScorePartwise> {
-    let doc = Document::parse(&xml)?;
-    let element = doc.root_element();
-    let score_partwise = scorepartwise::parse_score_partwise(element)?;
-    Ok(score_partwise)
-}
+pub mod yes_no;
+pub mod staff_layout;
+pub mod measure_layout;
+pub mod measure_numbering_value;
+pub mod part_display;
+pub mod dynamics;

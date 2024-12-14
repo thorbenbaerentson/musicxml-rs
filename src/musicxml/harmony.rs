@@ -1,146 +1,241 @@
-use super::core::{HarmonyItem, HarmonyKind, Step};
 use crate::prelude::*;
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use strum_macros::EnumString;
 
-#[derive(Debug)]
-pub struct Harmony {
-    items: Vec<HarmonyItem>,
-    position: usize,
+#[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+pub struct Pitch {
+    pub step: Step,
+    pub octave: u8,
 }
 
-pub fn parse_harmony(el: Node, position: usize) -> Result<Harmony> {
-    let mut items: Vec<HarmonyItem> = vec![];
+#[derive(Debug, EnumString, PartialEq, Serialize, Deserialize, Default, PartialOrd)]
+pub enum Step {
+    #[default]
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+}
 
-    for attr in el.attributes() {
-        match attr.name() {
-            // "number" => {
-            //     number = attr.value();
-            // }
-            _ => {
-                println!("Unhandled harmony attribute: {}", attr.name());
-                return Err(UnknownAttribute(format!("harmony element: {}", attr.name())).into());
-            }
-        }
-    }
+#[derive(Debug, EnumString, Serialize, Deserialize, PartialEq, PartialOrd, Default)]
+pub enum HarmonyKind {
+    #[strum(serialize = "major")]
+    #[serde(rename = "major")]
+    #[default]
+    Major,
 
-    for child in el.children() {
-        let child_name = child.tag_name().name();
-        match child_name {
-            "root" => {
-                let mut alter: Option<u8> = None;
-                let mut step: Step = Step::A;
-                child.children().for_each(|item| {
-                    let item_name = item.tag_name().name();
-                    match item_name {
-                        "root-step" => {
-                            step = Step::from_str(item.text().unwrap().trim()).unwrap();
-                        }
-                        "root-alter" => {
-                            alter = item.text().unwrap_or("0").parse().ok();
-                        }
-                        "" => {}
-                        _ => {
-                            println!("Unhandled harmony root child: {}", item_name);
-                        }
-                    }
-                });
-                items.push(HarmonyItem::Root { step, alter });
-            }
-            "kind" => {
-                let mut text: &str = "";
-                let mut kind: HarmonyKind = HarmonyKind::Major;
-                child.attributes().for_each(|attr| match attr.name() {
-                    "text" => {
-                        text = attr.value();
-                    }
-                    _ => {
-                        println!("Unhandled harmony kind attribute: {}", attr.name());
-                    }
-                });
+    #[strum(serialize = "minor")]
+    #[serde(rename = "minor")]
+    Minor,
 
-                child.children().for_each(|item| {
-                    let item_name = item.tag_name().name().trim();
-                    match item_name {
-                        "text" => {
-                            text = item.text().unwrap().trim();
-                        }
-                        "kind" => {
-                            let kind_text = item.text().unwrap_or("");
-                            kind = HarmonyKind::from_str(kind_text)
-                                .expect(format!("Unknown harmony kind: {}", kind_text).as_str());
-                        }
-                        "" => {}
-                        _ => {
-                            println!("Unhandled harmony kind child: {}", item_name);
-                        }
-                    }
-                });
-                items.push(HarmonyItem::Kind {
-                    text: text.to_string(),
-                    kind,
-                });
-            }
-            "bass" => {
-                let mut step: &str = "";
-                let mut alter: Option<u8> = None;
-                child.children().for_each(|item| {
-                    let item_name = item.tag_name().name();
-                    match item_name {
-                        "bass-step" => {
-                            step = item.text().unwrap_or("C");
-                        }
-                        "bass-alter" => {
-                            alter = item.text().unwrap_or("0").parse().ok();
-                        }
-                        "" => {}
-                        _ => {
-                            println!("Unhandled harmony bass child: {}", item_name);
-                            // return Err(UnknownElement(format!(
-                            //     "harmony bass element: {child_name}"
-                            // ))
-                            // .into());
-                        }
-                    }
-                });
-                items.push(HarmonyItem::Bass {
-                    step: step.to_string(),
-                    alter,
-                });
-            }
-            "" => {}
-            _ => {
-                panic!("UNKNOWN harmony child: {}", child_name);
-                return Err(UnknownElement(format!("harmony element: {child_name}")).into());
-            }
-        }
-    }
+    #[strum(serialize = "augmented")]
+    #[serde(rename = "augmented")]
+    Augmented,
 
-    Ok(Harmony { items, position })
+    #[strum(serialize = "diminished")]
+    #[serde(rename = "diminished")]
+    Diminished,
+
+    #[strum(serialize = "dominant")]
+    #[serde(rename = "dominant")]
+    Dominant,
+
+    #[strum(serialize = "major-seventh")]
+    #[serde(rename = "major-seventh")]
+    MajorSeventh,
+
+    #[strum(serialize = "minor-seventh")]
+    #[serde(rename = "minor-seventh")]
+    MinorSeventh,
+
+    #[strum(serialize = "diminished-seventh")]
+    #[serde(rename = "diminished-seventh")]
+    DiminishedSeventh,
+
+    #[strum(serialize = "half-diminished-seventh")]
+    #[serde(rename = "half-diminished-seventh")]
+    HalfDiminishedSeventh,
+
+    #[strum(serialize = "augmented-seventh")]
+    #[serde(rename = "augmented-seventh")]
+    AugmentedSeventh,
+
+    #[strum(serialize = "major-minor-seventh")]
+    #[serde(rename = "major-minor-seventh")]
+    MajorMinorSeventh,
+
+    #[strum(serialize = "dominant-ninth")]
+    #[serde(rename = "dominant-ninth")]
+    DominantNinth,
+
+    #[strum(serialize = "major-ninth")]
+    #[serde(rename = "major-ninth")]
+    MajorNinth,
+
+    #[strum(serialize = "minor-ninth")]
+    #[serde(rename = "minor-ninth")]
+    MinorNinth,
+
+    #[strum(serialize = "dominant-11th")]
+    #[serde(rename = "dominant-11th")]
+    Dominant11th,
+
+    #[strum(serialize = "major-11th")]
+    #[serde(rename = "major-11th")]
+    Major11th,
+
+    #[strum(serialize = "minor-11th")]
+    #[serde(rename = "minor-11th")]
+    Minor11th,
+
+    #[strum(serialize = "dominant-13th")]
+    #[serde(rename = "dominant-13th")]
+    Dominant13th,
+
+    #[strum(serialize = "major-13th")]
+    #[serde(rename = "major-13th")]
+    Major13th,
+
+    #[strum(serialize = "minor-13th")]
+    #[serde(rename = "minor-13th")]
+    Minor13th,
+
+    #[strum(serialize = "suspended-second")]
+    #[serde(rename = "suspended-second")]
+    SuspendedSecond,
+
+    #[strum(serialize = "suspended-fourth")]
+    #[serde(rename = "suspended-fourth")]
+    SuspendedFourth,
+
+    #[strum(serialize = "neapolitan")]
+    #[serde(rename = "neapolitan")]
+    Neapolitan,
+
+    #[strum(serialize = "italian")]
+    #[serde(rename = "italian")]
+    Italian,
+
+    #[strum(serialize = "french")]
+    #[serde(rename = "french")]
+    French,
+
+    #[strum(serialize = "german")]
+    #[serde(rename = "german")]
+    German,
+
+    #[strum(serialize = "pedal")]
+    #[serde(rename = "pedal")]
+    Pedal,
+
+    #[strum(serialize = "power")]
+    #[serde(rename = "power")]
+    Power,
+
+    #[strum(serialize = "tristan")]
+    #[serde(rename = "tristan")]
+    Tristan,
+
+    #[strum(serialize = "other")]
+    #[serde(rename = "other")]
+    Other,
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+pub enum HarmonyItem {
+    #[serde(rename = "root")]
+    Root {
+        #[serde(rename = "root-step", default = "Step::default")]
+        step: Step,
+        #[serde(rename = "root-alter", default = "Option::default")]
+        alter: Option<u8>,
+    },
+
+    #[serde(rename = "kind")]
+    Kind {
+        #[serde(default = "String::default")]
+        text: String,
+        #[serde(rename = "$value", default = "HarmonyKind::default")]
+        kind: HarmonyKind,
+    },
+
+    #[serde(rename = "bass")]
+    Bass {
+        #[serde(rename = "bass-step", default = "String::default")]
+        step: String,
+        #[serde(rename = "bass-alter", default = "Option::default")]
+        alter: Option<u8>,
+    },
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd, Default)]
+pub struct Harmony {
+    #[serde(rename = "$value", default = "Vec::default")]
+    items: Vec<HarmonyItem>,
+    #[serde(rename = "position", default = "usize::default")]
+    position: usize,
 }
 
 #[cfg(test)]
 mod tests {
-    use super::parse_harmony;
+    use crate::musicxml::harmony::{Harmony, HarmonyItem, HarmonyKind, Step};
     use roxmltree::Document;
+    use serde_xml_rs::from_str;
 
     #[test]
     fn example() {
-        let xml = r#"<harmony>
-        <root>
-          <root-step>A</root-step>
-          <root-alter>0</root-alter>
-        </root>
-        <kind text="7">dominant</kind>
-        <bass>
-          <bass-step>E</bass-step>
-          <bass-alter>0</bass-alter>
-        </bass>
-      </harmony>"#;
+        let xml = r#"
+            <harmony>
+                <root>
+                    <root-step>A</root-step>
+                    <root-alter>0</root-alter>
+                </root>
+                <kind text="7">dominant</kind>
+                <bass>
+                    <bass-step>E</bass-step>
+                    <bass-alter>0</bass-alter>
+                </bass>
+            </harmony>"#;
 
-        let item = parse_harmony(Document::parse(&xml).unwrap().root_element(), 0).unwrap();
-        println!("{:?}", item);
+        let item: Harmony = from_str(xml).unwrap();
+
+        let mut item_a = &item.items[0];
+        let mut check_a = HarmonyItem::Root {
+            step: Step::A,
+            alter: Some(0),
+        };
+        assert_eq!(*item_a, check_a);
+
+        item_a = &item.items[1];
+        check_a = HarmonyItem::Kind {
+            text: "7".to_string(),
+            kind: HarmonyKind::Dominant,
+        };
+        assert_eq!(*item_a, check_a);
+
+        item_a = &item.items[2];
+        check_a = HarmonyItem::Bass {
+            step: "E".to_string(),
+            alter: Some(0),
+        };
+        assert_eq!(*item_a, check_a);
+    }
+
+    #[test]
+    fn harmony_kind() {
+        let xml = r#"
+            <harmony>
+                <root>
+                    <root-step>D</root-step>
+                    <root-alter>0</root-alter>
+                </root>
+                <kind text="">major</kind>
+            </harmony>
+        "#;
+        let item: Harmony = from_str(xml).unwrap();
     }
 }
-
-// rust result to option
-// https://stackoverflow.com/questions/28227509/how-to-convert-a-result-to-an-option

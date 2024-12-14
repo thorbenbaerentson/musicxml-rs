@@ -1,6 +1,7 @@
-use crate::musicxml::core::{Pitch, Step};
 use crate::prelude::*;
 use std::str::FromStr;
+
+use super::harmony::{Pitch, Step};
 
 pub fn parse_option_pitch(el: Node) -> Option<Pitch> {
     let mut step: Step = Step::A;

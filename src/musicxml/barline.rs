@@ -1,63 +1,101 @@
-use super::core::{BarStyle, Location, RepeatDirection};
+use serde::{Deserialize, Serialize};
+use strum_macros::EnumString;
+
+use super::core::RepeatDirection;
+use super::left_right_middle::LeftRightMiddle;
+use super::printable_value::PrintableValue;
 use crate::prelude::*;
 use std::str::FromStr;
 
-#[derive(Debug)]
-pub struct Barline {
-    pub location: Location,
-    pub repeatdirection: Option<RepeatDirection>,
-    pub barstyle: BarStyle,
+// https://www.w3.org/2021/06/musicxml40/musicxml-reference/data-types/bar-style/
+#[derive(Debug, EnumString, Serialize, Deserialize, PartialEq, PartialOrd)]
+pub enum BarStyle {
+    #[strum(serialize = "standard")]
+    #[serde(rename = "standard")]
+    Standard,
+
+    #[strum(serialize = "dashed")]
+    #[serde(rename = "dashed")]
+    Dashed,
+
+    #[strum(serialize = "dotted")]
+    #[serde(rename = "dotted")]
+    Dotted,
+
+    #[strum(serialize = "heavy")]
+    #[serde(rename = "heavy")]
+    Heavy,
+
+    #[strum(serialize = "heavy-heavy")]
+    #[serde(rename = "heavy-heavy")]
+    HeavyHeavy,
+
+    #[strum(serialize = "heavy-light")]
+    #[serde(rename = "heavy-light")]
+    HeavyLight,
+
+    #[strum(serialize = "light-heavy")]
+    #[serde(rename = "light-heavy")]
+    LightHeavy,
+
+    #[strum(serialize = "light-light")]
+    #[serde(rename = "light-light")]
+    LightLight,
+
+    #[strum(serialize = "none")]
+    #[serde(rename = "none")]
+    None,
+
+    #[strum(serialize = "regular")]
+    #[serde(rename = "regular")]
+    Regular,
+
+    #[strum(serialize = "short")]
+    #[serde(rename = "short")]
+    Short,
+
+    #[strum(serialize = "tick")]
+    #[serde(rename = "tick")]
+    Tick,
 }
 
-pub fn parse_barline(el: Node) -> Result<Barline> {
-    let mut location: Location = Location::Right;
-    let mut barstyle: BarStyle = BarStyle::Standard;
-    let mut repeatdirection: Option<RepeatDirection> = None;
+// https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/barline/
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Barline {
+    #[serde(rename = "bar-style", default = "Option::default")]
+    pub barstyle: Option<BarStyle>,
 
-    for attr in el.attributes() {
-        match attr.name() {
-            "location" => {
-                location = Location::from_str(attr.value()).unwrap_or(Location::Right);
-            }
-            _ => {
-                println!("Unhandled barline attribute: {}", attr.name());
-                return Err(UnknownAttribute(format!("barline element: {}", attr.name())).into());
-            }
-        }
+    #[serde(default = "Option::default")]
+    pub footnote: Option<PrintableValue<String>>,
+
+    pub location: LeftRightMiddle,
+    pub repeatdirection: Option<RepeatDirection>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Barline;
+    use crate::musicxml::barline::{BarStyle, LeftRightMiddle};
+    use serde_xml_rs::from_str;
+
+    #[test]
+    fn barline() {
+        let mut xml = r#"
+            <barline location="middle">
+                <bar-style>dashed</bar-style>
+            </barline>"#;
+        let barline: Barline = from_str(xml).unwrap();
+
+        assert_eq!(barline.location, LeftRightMiddle::Middle);
+        assert_eq!(barline.barstyle.unwrap(), BarStyle::Dashed);
+
+        xml = r#"
+            <barline location="right">
+                <bar-style>light-light</bar-style>
+            </barline>"#;
+        let barline: Barline = from_str(xml).unwrap();
+
+        assert_eq!(barline.location, LeftRightMiddle::Right);
+        assert_eq!(barline.barstyle.unwrap(), BarStyle::LightLight);
     }
-
-    for child in el.children() {
-        let child_name = child.tag_name().name();
-        match child_name {
-            "bar-style" => {
-                if let Some(txt) = child.text() {
-                    barstyle = BarStyle::from_str(txt.trim())
-                        .expect(format!("Unknown barstyle: {}", txt).as_str());
-                }
-            }
-            "repeat" => {
-                for attr in child.attributes() {
-                    match attr.name() {
-                        "direction" => {
-                            repeatdirection = RepeatDirection::from_str(attr.value()).ok();
-                        }
-                        _ => {
-                            println!("Unhandled repeat attribute: {}", attr.name());
-                        }
-                    }
-                }
-            }
-            "" => {}
-            _ => {
-                println!("UNKNOWN barline child: {}", child_name);
-                return Err(UnknownElement(format!("barline element: {child_name}")).into());
-            }
-        }
-    }
-
-    Ok(Barline {
-        location,
-        repeatdirection,
-        barstyle,
-    })
 }
