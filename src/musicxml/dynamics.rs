@@ -82,5 +82,5 @@ pub enum Dynamics {
     SFZP,
 
     #[serde(rename = "other-dynamics")]
-    OtherDynamics
+    OtherDynamics,
 }

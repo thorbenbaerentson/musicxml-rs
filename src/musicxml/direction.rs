@@ -93,7 +93,7 @@ mod test_direction {
     use crate::musicxml::{
         core::DurationType,
         direction::{Direction, DirectionType, WedgeType},
-        printable_value::{FontStyle, FontWeight, TextDirection, PrintableValue},
+        printable_value::{FontStyle, FontWeight, PrintableValue, TextDirection},
     };
 
     use roxmltree::Document;
@@ -146,7 +146,7 @@ mod test_direction {
         let dir_type1 = &item.directiontypes[1];
 
         let check = PrintableValue::<String> {
-            text: "Allegro moderato".to_string(),
+            content: "Allegro moderato".to_string(),
             font_style: Some(FontStyle::Normal),
             font_weight: Some(FontWeight::Bold),
             ..Default::default()

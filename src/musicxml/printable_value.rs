@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+use super::{core::Placement, yes_no::YesNo};
+
 // https://www.w3.org/2021/06/musicxml40/musicxml-reference/data-types/text-direction/
-#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd)]
+#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd, Clone)]
 #[serde(rename = "text-direction")]
 pub enum TextDirection {
     #[default]
@@ -19,7 +21,7 @@ pub enum TextDirection {
 }
 
 // https://www.w3.org/2021/06/musicxml40/musicxml-reference/data-types/enclosure-shape/
-#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd)]
+#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd, Clone)]
 #[serde(rename = "enclosure-shape")]
 pub enum EnclosureShape {
     #[default]
@@ -69,7 +71,7 @@ pub enum EnclosureShape {
 }
 
 // https://www.w3.org/2021/06/musicxml40/musicxml-reference/data-types/font-weight/
-#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd)]
+#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd, Clone)]
 pub enum FontWeight {
     #[serde(rename = "normal")]
     #[default]
@@ -80,7 +82,7 @@ pub enum FontWeight {
 }
 
 // https://www.w3.org/2021/06/musicxml40/musicxml-reference/data-types/font-style/
-#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd)]
+#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd, Clone)]
 pub enum FontStyle {
     #[serde(rename = "normal")]
     #[default]
@@ -91,7 +93,7 @@ pub enum FontStyle {
 }
 
 // https://www.w3.org/2021/06/musicxml40/musicxml-reference/data-types/left-center-right/
-#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd)]
+#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd, Clone)]
 #[serde(rename = "left-center-right")]
 pub enum LeftCenterRight {
     #[serde(rename = "left")]
@@ -106,7 +108,7 @@ pub enum LeftCenterRight {
 }
 
 // https://www.w3.org/2021/06/musicxml40/musicxml-reference/data-types/valign/
-#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd)]
+#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd, Clone)]
 pub enum Valign {
     #[serde(rename = "top")]
     #[default]
@@ -123,7 +125,7 @@ pub enum Valign {
 }
 
 // https://www.w3.org/2021/06/musicxml40/musicxml-reference/data-types/xml-space/
-#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd)]
+#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd, Clone)]
 pub enum XmlSpace {
     #[serde(rename = "default")]
     #[default]
@@ -133,15 +135,28 @@ pub enum XmlSpace {
     Preserve,
 }
 
-/// Describes a value that is annotated with various information about how to print 
-/// or display it. 
-/// 
+// https://www.w3.org/2021/06/musicxml40/musicxml-reference/data-types/left-right/
+#[derive(Serialize, Deserialize, Debug, Default, PartialEq, PartialOrd, Clone)]
+pub enum LeftRight {
+    #[serde(rename = "left")]
+    #[default]
+    Left,
+
+    #[serde(rename = "right")]
+    Right,
+}
+
+/// Describes a value that is annotated with various information about how to print
+/// or display it.
+///
 // https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/footnote/
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Default)]
-pub struct PrintableValue<T> where 
-    T : Default {
+#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Default, Clone)]
+pub struct PrintableValue<T>
+where
+    T: Default,
+{
     #[serde(rename = "$value", default = "T::default")]
-    pub text: T,
+    pub content: T,
 
     #[serde(default = "Option::default")]
     pub color: Option<String>,
@@ -208,6 +223,37 @@ pub struct PrintableValue<T> where
 
     #[serde(rename = "xml:space", default = "Option::default")]
     pub xml_space: Option<XmlSpace>,
+
+    // The text attribute not the content!
+    #[serde(rename = "text", default = "Option::default")]
+    pub text: Option<String>,
+
+    #[serde(rename = "location", default = "Option::default")]
+    pub location: Option<LeftRight>,
+
+    #[serde(rename = "print-object", default = "Option::default")]
+    pub print_object: Option<YesNo>,
+
+    #[serde(rename = "bracket-degrees", default = "Option::default")]
+    pub bracket_degrees: Option<YesNo>,
+
+    #[serde(rename = "parentheses-degrees", default = "Option::default")]
+    pub parentheses_degrees: Option<YesNo>,
+
+    #[serde(rename = "stack-degrees", default = "Option::default")]
+    pub stack_degrees: Option<YesNo>,
+
+    #[serde(rename = "use-symbols", default = "Option::default")]
+    pub use_symbols: Option<YesNo>,
+
+    #[serde(rename = "alternate", default = "Option::default")]
+    pub alternate: Option<YesNo>,
+
+    #[serde(rename = "placement", default = "Option::default")]
+    pub placement: Option<Placement>,
+
+    #[serde(rename = "substitution", default = "Option::default")]
+    pub substitution: Option<YesNo>,
 }
 
 #[cfg(test)]
@@ -221,6 +267,6 @@ mod tests {
         let xml = r#"<footnote xml:lang="de">*) Urspr: = Nicht zu geschwind.</footnote>"#;
         let foot: PrintableValue<String> = from_str(xml).unwrap();
 
-        assert_eq!(foot.text, "*) Urspr: = Nicht zu geschwind.".to_string());
+        assert_eq!(foot.content, "*) Urspr: = Nicht zu geschwind.".to_string());
     }
 }

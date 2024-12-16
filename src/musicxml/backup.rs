@@ -26,7 +26,7 @@ mod tests {
             </backup>
         "#;
         let item: Backup = from_str(xml).unwrap();
-        
+
         assert_eq!(item.duration, 3);
         assert_eq!(item.footnote, None);
         assert_eq!(item.level, None);

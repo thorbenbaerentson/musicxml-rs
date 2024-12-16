@@ -1,21 +1,25 @@
 use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd, Clone)]
 pub struct Attributes {
     #[serde(default = "Option::default")]
     pub divisions: Option<usize>,
+
     #[serde(default = "Option::default")]
     pub staves: Option<u8>,
+
     #[serde(default = "Option::default")]
     pub key: Option<Key>,
+
     #[serde(default = "Option::default")]
     pub time: Option<Time>,
+
     #[serde(default = "Option::default")]
     pub clef: Option<Clef>,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd, Default)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd, Default, Clone)]
 pub enum KeyMode {
     #[serde(rename = "none")]
     #[default]
@@ -49,37 +53,37 @@ pub enum KeyMode {
     Locrian,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd, Clone)]
 pub struct Key {
     #[serde(default = "i8::default")]
-    number: i8,
+    pub number: i8,
 
     #[serde(default = "i8::default")]
-    fifths: i8,
+    pub fifths: i8,
 
     #[serde(default = "KeyMode::default")]
-    mode: KeyMode,
+    pub mode: KeyMode,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd, Clone)]
 pub struct Time {
     #[serde(default = "u8::default")]
-    beats: u8,
+    pub beats: u8,
 
     #[serde(default = "u8::default", rename = "beat-type")]
-    beat_type: u8,
+    pub beat_type: u8,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd, Clone)]
 pub struct Clef {
     #[serde(default = "char::default")]
-    sign: char,
+    pub sign: char,
 
     #[serde(default = "i8::default")]
-    line: i8,
+    pub line: i8,
 
     #[serde(default = "i8::default")]
-    number: i8,
+    pub number: i8,
 }
 
 impl Attributes {

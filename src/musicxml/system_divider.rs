@@ -1,8 +1,8 @@
-use serde::{Deserialize, Serialize};
 use super::{
     printable_value::{FontStyle, FontWeight, LeftCenterRight, Valign},
     yes_no::YesNo,
 };
+use serde::{Deserialize, Serialize};
 
 // https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/left-divider/
 #[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Default)]

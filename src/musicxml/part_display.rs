@@ -6,8 +6,8 @@ use super::printable_value::PrintableValue;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PartDisplay {
     #[serde(rename = "display-text", default = "Option::default")]
-    display_text : Option<PrintableValue<String>>,
+    display_text: Option<PrintableValue<String>>,
 
     #[serde(rename = "accidental-text", default = "Option::default")]
-    accidental_text : Option<PrintableValue<String>>,
+    accidental_text: Option<PrintableValue<String>>,
 }

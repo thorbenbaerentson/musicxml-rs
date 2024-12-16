@@ -1,9 +1,9 @@
-use serde::{Deserialize, Serialize};
-use crate::prelude::*;
 use super::{
     attributes::Attributes, barline::Barline, core::Duration, direction::Direction,
     harmony::Harmony, left_right_middle::LeftRightMiddle, level::Level, note::Note,
 };
+use crate::prelude::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub enum MarginType {

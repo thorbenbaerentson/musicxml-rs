@@ -3,13 +3,18 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use strum_macros::EnumString;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+use super::{
+    bass::Bass, degree::Degree, frame::Frame, level::Level, numeral::Numeral,
+    printable_value::PrintableValue, root::Root, yes_no::YesNo,
+};
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd, Clone)]
 pub struct Pitch {
     pub step: Step,
     pub octave: u8,
 }
 
-#[derive(Debug, EnumString, PartialEq, Serialize, Deserialize, Default, PartialOrd)]
+#[derive(Debug, EnumString, PartialEq, Serialize, Deserialize, Default, PartialOrd, Clone)]
 pub enum Step {
     #[default]
     A,
@@ -21,7 +26,20 @@ pub enum Step {
     G,
 }
 
-#[derive(Debug, EnumString, Serialize, Deserialize, PartialEq, PartialOrd, Default)]
+#[derive(Debug, EnumString, PartialEq, Serialize, Deserialize, Default, PartialOrd, Clone)]
+pub enum HarmonyArrangement {
+    #[serde(rename = "horizontal")]
+    #[default]
+    Horizontal,
+
+    #[serde(rename = "vertical")]
+    Vertical,
+
+    #[serde(rename = "diagonal")]
+    Diagonal,
+}
+
+#[derive(Debug, EnumString, Serialize, Deserialize, PartialEq, PartialOrd, Default, Clone)]
 pub enum HarmonyKind {
     #[strum(serialize = "major")]
     #[serde(rename = "major")]
@@ -145,46 +163,100 @@ pub enum HarmonyKind {
     Other,
 }
 
+#[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd, Default, Clone)]
+pub struct HarmonyOffset {
+    #[serde(rename = "$value", default = "f32::default")]
+    content: f32,
+
+    #[serde(rename = "sound", default = "Option::default")]
+    sound: Option<YesNo>,
+}
+
 #[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
 pub enum HarmonyItem {
     #[serde(rename = "root")]
-    Root {
-        #[serde(rename = "root-step", default = "Step::default")]
-        step: Step,
-        #[serde(rename = "root-alter", default = "Option::default")]
-        alter: Option<u8>,
-    },
+    Root(Root),
+
+    #[serde(rename = "numeral")]
+    Numeral(Numeral),
 
     #[serde(rename = "kind")]
-    Kind {
-        #[serde(default = "String::default")]
-        text: String,
-        #[serde(rename = "$value", default = "HarmonyKind::default")]
-        kind: HarmonyKind,
-    },
+    Kind(PrintableValue<HarmonyKind>),
+
+    #[serde(rename = "inversion")]
+    Inversion(PrintableValue<u8>),
 
     #[serde(rename = "bass")]
-    Bass {
-        #[serde(rename = "bass-step", default = "String::default")]
-        step: String,
-        #[serde(rename = "bass-alter", default = "Option::default")]
-        alter: Option<u8>,
-    },
+    Bass(Bass),
+
+    #[serde(rename = "degree")]
+    Degree(Degree),
+
+    #[serde(rename = "frame")]
+    Frame(Frame),
+
+    #[serde(rename = "offset")]
+    Offset(HarmonyOffset),
+
+    #[serde(rename = "footnote")]
+    Footnote(PrintableValue<String>),
+
+    #[serde(rename = "level")]
+    Level(Level),
+
+    #[serde(rename = "staff")]
+    Staff(u8),
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd, Default)]
 pub struct Harmony {
     #[serde(rename = "$value", default = "Vec::default")]
-    items: Vec<HarmonyItem>,
-    #[serde(rename = "position", default = "usize::default")]
-    position: usize,
+    pub items: Vec<HarmonyItem>,
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::musicxml::harmony::{Harmony, HarmonyItem, HarmonyKind, Step};
+    use crate::musicxml::{
+        harmony::{Harmony, HarmonyItem, HarmonyKind, Step},
+        numeral::{self, Numeral},
+        printable_value::LeftCenterRight,
+    };
     use roxmltree::Document;
     use serde_xml_rs::from_str;
+
+    #[test]
+    fn nano_sec_error() {
+        let xml = r#"
+            <harmony>
+                <root>
+                    <root-step>D</root-step>
+                    <root-alter>0</root-alter>
+                </root>
+                <kind text="">major</kind>
+            </harmony>
+        "#;
+
+        let item: Harmony = from_str(xml).unwrap();
+
+        match &item.items[0] {
+            HarmonyItem::Root(r) => {
+                assert_eq!(r.step.content, Step::D);
+                assert_eq!(r.alter.clone().unwrap().content, 0);
+            }
+            _ => {
+                panic!("Expected a root.");
+            }
+        }
+
+        match &item.items[1] {
+            HarmonyItem::Kind(k) => {
+                assert_eq!(k.content, HarmonyKind::Major);
+            }
+            _ => {
+                panic!("Expected a harmony kind.");
+            }
+        }
+    }
 
     #[test]
     fn example() {
@@ -203,26 +275,35 @@ mod tests {
 
         let item: Harmony = from_str(xml).unwrap();
 
-        let mut item_a = &item.items[0];
-        let mut check_a = HarmonyItem::Root {
-            step: Step::A,
-            alter: Some(0),
-        };
-        assert_eq!(*item_a, check_a);
+        match &item.items[0] {
+            HarmonyItem::Root(r) => {
+                assert_eq!(r.step.content, Step::A);
+                assert_eq!(r.alter.clone().unwrap().content, 0);
+            }
+            _ => {
+                panic!("Expected a root.");
+            }
+        }
 
-        item_a = &item.items[1];
-        check_a = HarmonyItem::Kind {
-            text: "7".to_string(),
-            kind: HarmonyKind::Dominant,
-        };
-        assert_eq!(*item_a, check_a);
+        match &item.items[1] {
+            HarmonyItem::Kind(k) => {
+                assert_eq!(k.content, HarmonyKind::Dominant);
+                assert_eq!(k.text.clone().unwrap(), "7".to_string());
+            }
+            _ => {
+                panic!("Expected a harmony kind.");
+            }
+        }
 
-        item_a = &item.items[2];
-        check_a = HarmonyItem::Bass {
-            step: "E".to_string(),
-            alter: Some(0),
-        };
-        assert_eq!(*item_a, check_a);
+        match &item.items[2] {
+            HarmonyItem::Bass(b) => {
+                assert_eq!(b.step.content, Step::E);
+                assert_eq!(b.alter.clone().unwrap().content, 0.0);
+            }
+            _ => {
+                panic!("Expected a harmony kind.");
+            }
+        }
     }
 
     #[test]
@@ -237,5 +318,116 @@ mod tests {
             </harmony>
         "#;
         let item: Harmony = from_str(xml).unwrap();
+
+        match &item.items[0] {
+            HarmonyItem::Root(r) => {
+                assert_eq!(r.step.content, Step::D);
+                assert_eq!(r.alter.clone().unwrap().content, 0);
+            }
+            _ => {
+                panic!("Expected a root.");
+            }
+        }
+
+        match &item.items[1] {
+            HarmonyItem::Kind(k) => {
+                assert_eq!(k.content, HarmonyKind::Major);
+            }
+            _ => {
+                panic!("Expected a harmony kind.");
+            }
+        }
+    }
+
+    #[test]
+    fn harmony_item() {
+        let xml = r#"
+            <harmony default-y="-80">
+                <numeral>
+                    <numeral-root text="IV">4</numeral-root>
+                </numeral>
+                <kind halign="center" text="">minor</kind>
+                <inversion>1</inversion>
+            </harmony>
+        "#;
+
+        let item: Harmony = from_str(xml).unwrap();
+        assert_eq!(item.items.len(), 3);
+
+        match &item.items[0] {
+            HarmonyItem::Numeral(num) => {
+                assert_eq!(num.root.text.clone().unwrap(), "IV".to_string());
+                assert_eq!(num.root.content, 4);
+            }
+            _ => {
+                panic!("Expected a numeral.");
+            }
+        }
+
+        match &item.items[1] {
+            HarmonyItem::Kind(k) => {
+                assert_eq!(k.halign.clone().unwrap(), LeftCenterRight::Center);
+                assert_eq!(k.content, HarmonyKind::Minor);
+            }
+            _ => {
+                panic!("Expected a kind.");
+            }
+        }
+
+        match &item.items[2] {
+            HarmonyItem::Inversion(i) => {
+                assert_eq!(i.content, 1);
+            }
+            _ => {
+                panic!("Expected a kind.");
+            }
+        }
+    }
+
+    #[test]
+    fn harmony_item_2() {
+        let xml = r#"
+            <harmony>
+                <root>
+                    <root-step>C</root-step>
+                </root>
+                <kind halign="center" text="">major</kind>
+                <bass arrangement="horizontal">
+                    <bass-step>G</bass-step>
+                    <bass-alter>1</bass-alter>
+                </bass>
+            </harmony>
+        "#;
+
+        let item: Harmony = from_str(xml).unwrap();
+
+        match &item.items[0] {
+            HarmonyItem::Root(r) => {
+                assert_eq!(r.step.content, Step::C);
+            }
+            _ => {
+                panic!("Expected a root.");
+            }
+        }
+
+        match &item.items[1] {
+            HarmonyItem::Kind(k) => {
+                assert_eq!(k.halign.clone().unwrap(), LeftCenterRight::Center);
+                assert_eq!(k.content, HarmonyKind::Major);
+            }
+            _ => {
+                panic!("Expected a harmony kind.");
+            }
+        }
+
+        match &item.items[2] {
+            HarmonyItem::Bass(b) => {
+                assert_eq!(b.step.content, Step::G);
+                assert_eq!(b.alter.clone().unwrap().content, 1.0);
+            }
+            _ => {
+                panic!("Expected a harmony kind.");
+            }
+        }
     }
 }

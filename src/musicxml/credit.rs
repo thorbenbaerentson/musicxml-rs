@@ -35,6 +35,6 @@ mod tests {
         assert_eq!(words.font_weight.unwrap(), FontWeight::Bold);
         assert_eq!(words.halign.unwrap(), LeftCenterRight::Center);
         assert_eq!(words.valign.unwrap(), Valign::Top);
-        assert_eq!(words.text, "Sonata, Op. 27, No. 2".to_string());
+        assert_eq!(words.content, "Sonata, Op. 27, No. 2".to_string());
     }
 }

@@ -1,4 +1,4 @@
-use super::{articulations::ArticulationType};
+use super::articulations::ArticulationType;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use strum_macros::EnumString;

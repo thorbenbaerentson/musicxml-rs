@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub enum MeasureNumberingValue {
     #[serde(rename = "none")]
@@ -8,8 +7,8 @@ pub enum MeasureNumberingValue {
     None,
 
     #[serde(rename = "measure")]
-    Measure, 
+    Measure,
 
     #[serde(rename = "system")]
-    System
+    System,
 }

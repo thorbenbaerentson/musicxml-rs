@@ -1,10 +1,10 @@
-use serde::{Deserialize, Serialize};
-use crate::prelude::*;
 use super::{
     attributes::Attributes, backup::Backup, barline::Barline, core::Duration, direction::Direction,
     forward::Forward, harmony::Harmony, left_right_middle::LeftRightMiddle, level::Level,
-    note::Note, print::Print,
+    note::Note, print::Print, yes_no::YesNo,
 };
+use crate::prelude::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum MeasureContent {
@@ -31,30 +31,27 @@ pub enum MeasureContent {
 
     #[serde(rename = "direction")]
     Direction(Direction),
+
+    #[serde(rename = "non-controlling")]
+    NonControlling(YesNo),
+
+    #[serde(rename = "implicit")]
+    Implicit(YesNo),
+
+    #[serde(rename = "id")]
+    Id(String),
+
+    #[serde(rename = "width")]
+    Width(f32),
+
+    #[serde(rename = "number")]
+    Number(String),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Measure {
-    #[serde(default = "String::default")]
-    pub number: String,
-
-    #[serde(default = "Option::default")]
-    pub width: Option<f32>,
-
-    #[serde(default = "Option::default")]
-    pub id: Option<String>,
-
-    #[serde(default = "Option::default")]
-    pub implicit: Option<bool>,
-
-    #[serde(rename = "non-controlling", default = "Option::default")]
-    pub non_controlling: Option<bool>,
-
     #[serde(rename = "$value", default = "Vec::default")]
     pub content: Vec<MeasureContent>,
-
-    #[serde(default = "Option::default")]
-    pub duration: Option<Duration>,
 }
 
 impl Measure {
@@ -67,7 +64,7 @@ impl Measure {
                         voice.push(note)
                     };
                 }
-                _ => {},
+                _ => {}
             }
         }
         voice
@@ -93,7 +90,10 @@ impl Measure {
 
 #[cfg(test)]
 mod test_measure {
-    use crate::musicxml::measure::Measure;
+    use crate::musicxml::attributes::{Key, KeyMode};
+    use crate::musicxml::core::DurationType;
+    use crate::musicxml::harmony::{Pitch, Step};
+    use crate::musicxml::measure::{Measure, MeasureContent};
     use crate::prelude::*;
     use roxmltree::Document;
     use serde_xml_rs::from_str;
@@ -129,19 +129,50 @@ mod test_measure {
 
           </measure>"#;
 
-        match from_str::<Measure>(xml) {
-            Ok(_) => {}
-            Err(e) => {
-                println!("--------\n\t{}\n---------", e);
+        let item: Measure = from_str(xml).unwrap();
+
+        assert_eq!(2, item.content.len());
+
+        match &item.content[0] {
+            MeasureContent::Attributes(a) => {
+                assert_eq!(a.divisions.unwrap(), 1);
+                assert_eq!(
+                    a.key.clone().unwrap(),
+                    Key {
+                        number: 0,
+                        fifths: 0,
+                        mode: KeyMode::None
+                    }
+                );
+
+                assert_eq!(a.time.clone().unwrap().beats, 4);
+                assert_eq!(a.time.clone().unwrap().beat_type, 4);
+
+                assert_eq!(a.clef.clone().unwrap().sign, 'G');
+                assert_eq!(a.clef.clone().unwrap().line, 2);
+            }
+
+            _ => {
+                panic!("Expected attributes")
             }
         }
 
-        let item: Measure = from_str(xml).unwrap();
-
-        assert_eq!("1".to_string(), item.number);
-        // assert_eq!(item.attributes.unwrap().divisions.unwrap(), 1);
-
-        assert_eq!(2, item.content.len());
+        match &item.content[1] {
+            MeasureContent::Note(n) => {
+                assert_eq!(
+                    n.pitch.clone().unwrap(),
+                    Pitch {
+                        step: Step::C,
+                        octave: 4
+                    }
+                );
+                assert_eq!(n.duration, 4);
+                assert_eq!(n.notetype, DurationType::Whole);
+            }
+            _ => {
+                panic!("Expected note")
+            }
+        }
     }
 
     #[test]
@@ -225,8 +256,6 @@ mod test_measure {
 
         assert_eq!(voice2[0].position, 0);
         assert_eq!(voice2[1].position, 0);
-
-        assert_eq!(item.duration, None);
     }
 
     #[test]
@@ -381,34 +410,42 @@ mod test_measure {
         <measure number="1">
         <attributes>
           <divisions>4</divisions>
+
           <key number="1">
             <fifths>2</fifths>
             <mode>major</mode>
           </key>
+
           <time>
             <beats>4</beats>
             <beat-type>4</beat-type>
           </time>
+
           <staves>1</staves>
+
           <clef number="1">
             <sign>G</sign>
             <line>2</line>
           </clef>
+
         </attributes>
         <note>
           <pitch>
             <step>G</step>
             <octave>4</octave>
           </pitch>
+
           <duration>4</duration>
           <voice>1</voice>
           <type>quarter</type>
           <stem>up</stem>
           <staff>1</staff>
         </note>
+
         <backup>
           <duration>4</duration>
         </backup>
+
         <harmony>
           <root>
             <root-step>D</root-step>
@@ -416,9 +453,11 @@ mod test_measure {
           </root>
           <kind text="">major</kind>
         </harmony>
+
         <forward>
           <duration>4</duration>
         </forward>
+
         <note>
           <pitch>
             <step>G</step>
@@ -430,9 +469,11 @@ mod test_measure {
           <stem>up</stem>
           <staff>1</staff>
         </note>
+
         <backup>
           <duration>4</duration>
         </backup>
+
         <harmony>
           <root>
             <root-step>A</root-step>
@@ -444,9 +485,11 @@ mod test_measure {
             <bass-alter>0</bass-alter>
           </bass>
         </harmony>
+
         <forward>
           <duration>4</duration>
         </forward>
+
         <note>
           <pitch>
             <step>G</step>
@@ -458,9 +501,11 @@ mod test_measure {
           <stem>up</stem>
           <staff>1</staff>
         </note>
+
         <backup>
           <duration>4</duration>
         </backup>
+
         <harmony>
           <root>
             <root-step>D</root-step>
@@ -472,9 +517,11 @@ mod test_measure {
             <bass-alter>1</bass-alter>
           </bass>
         </harmony>
+
         <forward>
           <duration>4</duration>
         </forward>
+        
         <note>
           <pitch>
             <step>G</step>

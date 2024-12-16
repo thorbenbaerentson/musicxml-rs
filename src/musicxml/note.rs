@@ -81,7 +81,7 @@ pub struct Note {
     pub default_y: Option<f32>,
 }
 
-#[derive(Debug, EnumString, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, EnumString, PartialEq, Serialize, Deserialize, Default, PartialOrd)]
 pub enum StartStop {
     #[strum(serialize = "start")]
     #[serde(rename = "start")]

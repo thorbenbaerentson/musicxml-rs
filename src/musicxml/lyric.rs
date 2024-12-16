@@ -1,7 +1,7 @@
 use super::{
     core::{Placement, SyllabicType},
-    start_stop_continue::StartStopContinue,
     printable_value::LeftCenterRight,
+    start_stop_continue::StartStopContinue,
     yes_no::YesNo,
 };
 
@@ -85,8 +85,8 @@ mod tests {
     use crate::musicxml::{
         core::{Placement, SyllabicType},
         lyric::Lyric,
-        start_stop_continue::StartStopContinue,
         printable_value::LeftCenterRight,
+        start_stop_continue::StartStopContinue,
     };
     use roxmltree::Document;
     use serde_xml_rs::from_str;
