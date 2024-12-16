@@ -1,8 +1,6 @@
-use std::time::Duration;
-
 use serde::{Deserialize, Serialize};
 
-use super::{level::Level, printable_value::PrintableValue};
+use super::{core::Duration, level::Level, printable_value::PrintableValue};
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct Forward {

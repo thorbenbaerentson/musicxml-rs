@@ -429,12 +429,12 @@ mod test_measure {
           </clef>
 
         </attributes>
+
         <note>
           <pitch>
             <step>G</step>
             <octave>4</octave>
           </pitch>
-
           <duration>4</duration>
           <voice>1</voice>
           <type>quarter</type>
@@ -521,7 +521,7 @@ mod test_measure {
         <forward>
           <duration>4</duration>
         </forward>
-        
+
         <note>
           <pitch>
             <step>G</step>
