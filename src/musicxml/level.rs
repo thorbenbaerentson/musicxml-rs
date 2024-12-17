@@ -6,7 +6,7 @@ use super::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Default)]
 pub struct Level {
     #[serde(rename = "$value", default = "String::default")]
     content: String,

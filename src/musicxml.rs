@@ -1,6 +1,7 @@
 use self::score_partwise::ScorePartwise;
 use crate::prelude::*;
 
+pub mod accidental;
 pub mod articulations;
 pub mod attributes;
 pub mod backup;
@@ -14,6 +15,8 @@ pub mod direction;
 pub mod dynamics;
 pub mod forward;
 pub mod frame;
+pub mod group_barline;
+pub mod group_symbol;
 pub mod harmony;
 pub mod identification;
 pub mod left_right_middle;
@@ -32,6 +35,7 @@ pub mod page_layout;
 pub mod page_margins;
 pub mod part;
 pub mod part_display;
+pub mod part_group;
 pub mod pitch;
 pub mod print;
 pub mod printable_value;

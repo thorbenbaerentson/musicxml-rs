@@ -148,17 +148,13 @@ pub enum LeftRight {
 
 /// Describes a value that is annotated with various information about how to print
 /// or display it.
-///
 // https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/footnote/
 #[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Default, Clone)]
 pub struct PrintableValue<T>
 where
     T: Default,
 {
-    #[serde(rename = "$value", default = "T::default")]
-    pub content: T,
-
-    #[serde(default = "Option::default")]
+    #[serde(rename = "color", default = "Option::default")]
     pub color: Option<String>,
 
     #[serde(rename = "default-x", default = "Option::default")]
@@ -254,6 +250,9 @@ where
 
     #[serde(rename = "substitution", default = "Option::default")]
     pub substitution: Option<YesNo>,
+
+    #[serde(rename = "$value", default = "T::default")]
+    pub content: T,
 }
 
 #[cfg(test)]

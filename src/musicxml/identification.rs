@@ -56,7 +56,7 @@ pub struct MiscellaneousField {
 #[derive(Debug, Serialize, Deserialize, Default, PartialEq, PartialOrd, Clone)]
 pub struct Miscellaneous {
     #[serde(rename = "miscellaneous-field", default = "Vec::default")]
-    miscellaneous_field: Vec<MiscellaneousField>,
+    pub miscellaneous_fields: Vec<MiscellaneousField>,
 }
 
 // https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/identification/
@@ -146,11 +146,11 @@ mod tests {
         assert_eq!(item.relation.unwrap(), "urn:ISBN:0-486-24131-9".to_string());
 
         let misc = &item.miscellaneous.unwrap();
-        assert_eq!(misc.miscellaneous_field.len(), 1);
+        assert_eq!(misc.miscellaneous_fields.len(), 1);
         assert_eq!(
-            misc.miscellaneous_field[0].name,
+            misc.miscellaneous_fields[0].name,
             "difficulty-level".to_string()
         );
-        assert_eq!(misc.miscellaneous_field[0].content, "3".to_string());
+        assert_eq!(misc.miscellaneous_fields[0].content, "3".to_string());
     }
 }
