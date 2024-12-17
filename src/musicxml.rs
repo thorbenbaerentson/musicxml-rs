@@ -36,6 +36,7 @@ pub mod page_margins;
 pub mod part;
 pub mod part_display;
 pub mod part_group;
+pub mod part_list;
 pub mod pitch;
 pub mod print;
 pub mod printable_value;

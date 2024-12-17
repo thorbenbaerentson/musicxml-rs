@@ -5,8 +5,11 @@ use crate::prelude::*;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ScoreInstrument {
     #[serde(default = "String::default")]
-    id: String,
+    pub id: String,
 
-    #[serde(default = "String::default")]
-    instrument_name: String,
+    #[serde(rename = "instrument-name", default = "String::default")]
+    pub instrument_name: String,
+
+    #[serde(rename = "instrument-sound", default = "String::default")]
+    pub instrument_sound: String,
 }

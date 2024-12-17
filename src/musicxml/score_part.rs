@@ -6,6 +6,16 @@ use crate::musicxml::{
 use crate::prelude::*;
 
 use super::identification::Identification;
+use super::part_group::GroupDisplay;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Player {
+    #[serde(rename = "player-name", default = "String::default")]
+    pub player_name: String,
+
+    #[serde(rename = "id", default = "String::default")]
+    pub id: String,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ScorePart {
@@ -15,18 +25,24 @@ pub struct ScorePart {
     #[serde(default = "String::default")]
     pub id: String,
 
-    #[serde(default = "String::default")]
+    #[serde(rename = "part-name", default = "String::default")]
     pub part_name: String,
+
+    #[serde(rename = "part-name-display", default = "Option::default")]
+    pub part_name_display: Option<GroupDisplay>,
 
     #[serde(rename = "part-abbrevieation", default = "String::default")]
     pub part_abbrevieation: String,
 
-    #[serde(rename = "score-instrument", default = "Option::default")]
-    pub score_instrument: Option<ScoreInstrument>,
+    #[serde(rename = "score-instrument", default = "Vec::default")]
+    pub score_instruments: Vec<ScoreInstrument>,
 
-    #[serde(rename = "midi-device", default = "Option::default")]
-    pub midi_device: Option<MidiDevice>,
+    #[serde(rename = "player", default = "Vec::default")]
+    pub players: Vec<Player>,
 
-    #[serde(rename = "midi-instrument", default = "Option::default")]
-    pub midi_instrument: Option<MidiInstrument>,
+    #[serde(rename = "midi-device", default = "Vec::default")]
+    pub midi_devices: Vec<MidiDevice>,
+
+    #[serde(rename = "midi-instrument", default = "Vec::default")]
+    pub midi_instruments: Vec<MidiInstrument>,
 }

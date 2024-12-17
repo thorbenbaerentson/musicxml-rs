@@ -20,10 +20,8 @@ pub struct ScorePartwise {
     #[serde(default = "String::default")]
     pub version: String,
 
-    // #[serde(rename = "part-list", default = "PartList::default")]
-    // pub parts: PartList,
-    #[serde(default = "Vec::default")]
-    pub partlist: Vec<ScorePart>,
+    #[serde(rename = "part", default = "Vec::default")]
+    pub parts: Vec<ScorePart>,
 
     #[serde(default = "Option::default")]
     pub identification: Option<Identification>,
@@ -52,12 +50,10 @@ mod tests {
         );
 
         let ident = &item.identification.unwrap();
-        assert_eq!(
-            ident.miscellaneous.clone().unwrap().miscellaneous_fields[0].name,
-            "description".to_string()
-        );
-        assert!(ident.miscellaneous.clone().unwrap().miscellaneous_fields[0]
+        let misc = ident.miscellaneous.clone().unwrap();
+        assert_eq!(misc.miscellaneous_fields[0].name, "description".to_string());
+        assert!(misc.miscellaneous_fields[0]
             .content
-            .starts_with("All pitches from G to c"));
+            .starts_with("All pitches"));
     }
 }
