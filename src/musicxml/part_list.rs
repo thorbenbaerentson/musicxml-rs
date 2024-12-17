@@ -1,4 +1,4 @@
-use super::{part_group::PartGroup, score_part::ScorePart};
+use super::{part_group::PartGroup, printable_value::PrintableValue, score_part::ScorePart};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -8,9 +8,12 @@ pub enum PartListContent {
 
     #[serde(rename = "score-part")]
     ScorePart(#[serde(default = "ScorePart::default")] ScorePart),
+
+    #[serde(rename = "part-name")]
+    PartName(#[serde(default = "PrintableValue::default")] PrintableValue<String>),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct PartList {
     #[serde(rename = "$value", default = "Vec::default")]
     pub parts: Vec<PartListContent>,

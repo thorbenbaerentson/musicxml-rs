@@ -31,8 +31,8 @@ pub struct ScorePart {
     #[serde(rename = "part-name-display", default = "Option::default")]
     pub part_name_display: Option<GroupDisplay>,
 
-    #[serde(rename = "part-abbrevieation", default = "String::default")]
-    pub part_abbrevieation: String,
+    #[serde(rename = "part-abbreviation", default = "String::default")]
+    pub part_abbreviation: String,
 
     #[serde(rename = "score-instrument", default = "Vec::default")]
     pub score_instruments: Vec<ScoreInstrument>,
