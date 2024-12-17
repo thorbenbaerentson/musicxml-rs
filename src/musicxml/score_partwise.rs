@@ -25,8 +25,8 @@ pub struct ScorePartwise {
     #[serde(rename = "part-list", default = "PartList::default")]
     pub part_list: PartList,
 
-    #[serde(rename = "part", default = "Vec::default")]
-    pub parts: Vec<ScorePart>,
+    // #[serde(rename = "part", default = "Vec::default")]
+    // pub parts: Vec<ScorePart>,
 
     #[serde(default = "Option::default")]
     pub identification: Option<Identification>,
@@ -67,7 +67,12 @@ mod tests {
         match &part_list.parts[0] {
             PartListContent::ScorePart(score_part) => {
                 assert_eq!(score_part.id, "P1".to_string());
-                assert_eq!(score_part.part_name, "MusicXML Part".to_string());
+                match &score_part.content[0] {
+                    crate::musicxml::score_part::ScorePartContent::PartName(n) => {
+                        assert_eq!(n, &"MusicXML Part".to_string());
+                    },
+                    _ => { panic!("Expected different item.")}
+                }
             },
             PartListContent::PartGroup(part_group) => {
                 println!("No.: {}", part_list.parts.len());
@@ -110,10 +115,9 @@ mod tests {
         let item: ScorePartwise = from_str(&xml).unwrap();        
     }
 
-    // #[test]
-    // fn my_bonnie() {
-    //     let xml = fs::read_to_string("resources/xml-test-files/my_bonnie.xml").unwrap();
-    //     let item: ScorePartwise = from_str(&xml).unwrap();
-
-    // }
+    #[test]
+    fn my_bonnie() {
+        let xml = fs::read_to_string("resources/xml-test-files/my_bonnie.musicxml").unwrap();
+        let item: ScorePartwise = from_str(&xml).unwrap();
+    }
 }

@@ -21,6 +21,8 @@ pub struct PartList {
 
 #[cfg(test)]
 mod tests {
+    use crate::musicxml::{part_list::PartListContent, score_part::ScorePartContent};
+
     use super::PartList;
     use serde_xml_rs::from_str;
 
@@ -62,34 +64,70 @@ mod tests {
 
         let part = &item.parts[0];
         match &item.parts[0] {
-            crate::musicxml::part_list::PartListContent::ScorePart(p) => {
-                assert_eq!(p.part_name, "Soprano Alto".to_string());
-                assert_eq!(
-                    p.part_name_display.clone().unwrap().display_text,
-                    "Soprano Alto".to_string()
-                );
+            PartListContent::ScorePart(p) => {
+                match &p.content[0] {
+                    ScorePartContent::PartName(n) => {
+                        assert_eq!(n, &"Soprano Alto".to_string());
+                    },
+                    _ => { panic!("Expected different item"); }
+                }
 
-                let inst_1 = &p.score_instruments[0];
-                assert_eq!(inst_1.id, "P1-I1".to_string());
-                assert_eq!(inst_1.instrument_name, "ARIA Player".to_string());
-                assert_eq!(inst_1.instrument_sound, "voice.soprano".to_string());
+                match &p.content[1] {
+                    ScorePartContent::PartNameDisplay(n) => {
+                        assert_eq!(n.display_text, "Soprano Alto".to_string());
+                    },
+                    _ => { panic!("Expected different item"); }
+                }
 
-                let inst_2 = &p.score_instruments[1];
-                assert_eq!(inst_2.id, "P1-I2".to_string());
-                assert_eq!(inst_2.instrument_name, "ARIA Player".to_string());
-                assert_eq!(inst_2.instrument_sound, "voice.alto".to_string());
+                match &p.content[2] {
+                    ScorePartContent::ScoreInstrument(inst_1) => {
+                        assert_eq!(inst_1.id, "P1-I1".to_string());
+                        assert_eq!(inst_1.instrument_name, "ARIA Player".to_string());
+                        assert_eq!(inst_1.instrument_sound, "voice.soprano".to_string());
+                    },
+                    _ => { panic!("Expected different item"); }
+                }
 
-                assert_eq!(p.players[0].id, "P1-M1".to_string());
-                assert_eq!(p.players[0].player_name, "Soprano 1".to_string());
+                match &p.content[3] {
+                    ScorePartContent::ScoreInstrument(inst_2) => {
+                        assert_eq!(inst_2.id, "P1-I2".to_string());
+                        assert_eq!(inst_2.instrument_name, "ARIA Player".to_string());
+                        assert_eq!(inst_2.instrument_sound, "voice.alto".to_string());
+                    },
+                    _ => { panic!("Expected different item"); }
+                }
 
-                assert_eq!(p.players[1].id, "P1-M2".to_string());
-                assert_eq!(p.players[1].player_name, "Soprano 2".to_string());
+                match &p.content[4] {
+                    ScorePartContent::Player(p) => {
+                        assert_eq!(p.id, "P1-M1".to_string());
+                        assert_eq!(p.player_name, "Soprano 1".to_string());
+                    },
+                    _ => { panic!("Expected different item"); }
+                }
 
-                assert_eq!(p.players[2].id, "P1-M3".to_string());
-                assert_eq!(p.players[2].player_name, "Alto 1".to_string());
+                match &p.content[5] {
+                    ScorePartContent::Player(p) => {
+                        assert_eq!(p.id, "P1-M2".to_string());
+                        assert_eq!(p.player_name, "Soprano 2".to_string());
+                    },
+                    _ => { panic!("Expected different item"); }
+                }
 
-                assert_eq!(p.players[3].id, "P1-M4".to_string());
-                assert_eq!(p.players[3].player_name, "Alto 2".to_string());
+                match &p.content[6] {
+                    ScorePartContent::Player(p) => {
+                        assert_eq!(p.id, "P1-M3".to_string());
+                        assert_eq!(p.player_name, "Alto 1".to_string());
+                    },
+                    _ => { panic!("Expected different item"); }
+                }
+
+                match &p.content[7] {
+                    ScorePartContent::Player(p) => {
+                        assert_eq!(p.id, "P1-M4".to_string());
+                        assert_eq!(p.player_name, "Alto 2".to_string());
+                    },
+                    _ => { panic!("Expected different item"); }
+                }
             }
 
             _ => {
