@@ -93,36 +93,39 @@ pub enum StartStop {
     Stop,
 }
 
+#[derive(Debug, PartialEq, Serialize, Deserialize, Default)]
+pub struct  NotationTypeMeta {
+    #[serde(default = "StartStop::default")]
+    pub r#type: StartStop,
+
+    #[serde(rename = "bezier-offset", default = "Option::default")]
+    pub bezier_offset: Option<f32>,
+
+    #[serde(rename = "bezier-offset2", default = "Option::default")]
+    pub bezier_offset2: Option<f32>,
+
+    #[serde(rename = "bezier-x", default = "Option::default")]
+    pub bezier_x: Option<f32>,
+
+    #[serde(rename = "bezier-x2", default = "Option::default")]
+    pub bezier_x2: Option<f32>,
+
+    #[serde(rename = "bezier-y", default = "Option::default")]
+    pub bezier_y: Option<f32>,
+
+    #[serde(rename = "bezier-y2", default = "Option::default")]
+    pub bezier_y2: Option<f32>,
+
+    #[serde(rename = "color", default = "Option::default")]
+    pub color: Option<String>,
+}
+
 // https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/accidental-mark/
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum NotationType {
     #[serde(rename = "tied")]
-    Tied {
-        #[serde(default = "StartStop::default")]
-        r#type: StartStop,
-
-        #[serde(rename = "bezier-offset", default = "Option::default")]
-        bezier_offset: Option<f32>,
-
-        #[serde(rename = "bezier-offset2", default = "Option::default")]
-        bezier_offset2: Option<f32>,
-
-        #[serde(rename = "bezier-x", default = "Option::default")]
-        bezier_x: Option<f32>,
-
-        #[serde(rename = "bezier-x2", default = "Option::default")]
-        bezier_x2: Option<f32>,
-
-        #[serde(rename = "bezier-y", default = "Option::default")]
-        bezier_y: Option<f32>,
-
-        #[serde(rename = "bezier-y2", default = "Option::default")]
-        bezier_y2: Option<f32>,
-
-        #[serde(rename = "color", default = "Option::default")]
-        color: Option<String>,
-    },
+    Tied(NotationTypeMeta),
 
     #[serde(rename = "slur")]
     Slur {
@@ -244,7 +247,7 @@ mod tests_note {
         articulations::{ArticulationMeta, ArticulationType, Articulations},
         core::{DirectionUD, DurationType, Placement},
         harmony::Step,
-        note::{NotationType, Note, StartStop},
+        note::{NotationType, NotationTypeMeta, Note, StartStop},
         stem::Stem,
     };
     use roxmltree::Document;
@@ -353,16 +356,7 @@ mod tests_note {
             notations.notations[0]
         );
         assert_eq!(
-            NotationType::Tied {
-                r#type: StartStop::Stop,
-                bezier_offset: Option::default(),
-                bezier_offset2: Option::default(),
-                bezier_x: Option::default(),
-                bezier_x2: Option::default(),
-                bezier_y: Option::default(),
-                bezier_y2: Option::default(),
-                color: Option::default(),
-            },
+            NotationType::Tied(NotationTypeMeta::default()),
             notations.notations[1]
         );
     }

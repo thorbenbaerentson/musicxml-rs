@@ -46,6 +46,9 @@ pub enum MeasureContent {
 
     #[serde(rename = "number")]
     Number(String),
+
+    #[serde(rename = "rest")]
+    Rest(String),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -92,7 +95,7 @@ impl Measure {
 mod test_measure {
     use crate::musicxml::attributes::{Key, KeyMode};
     use crate::musicxml::core::DurationType;
-    use crate::musicxml::harmony::{Pitch, Step};
+    use crate::musicxml::harmony::{Harmony, Pitch, Step};
     use crate::musicxml::measure::{Measure, MeasureContent};
     use crate::prelude::*;
     use roxmltree::Document;
@@ -148,7 +151,7 @@ mod test_measure {
                 assert_eq!(a.time.clone().unwrap().beats, 4);
                 assert_eq!(a.time.clone().unwrap().beat_type, 4);
 
-                assert_eq!(a.clef.clone().unwrap().sign, 'G');
+                assert_eq!(a.clef.clone().unwrap().sign, "G");
                 assert_eq!(a.clef.clone().unwrap().line, 2);
             }
 
@@ -536,4 +539,258 @@ mod test_measure {
       </measure>"#;
         let item: Measure = from_str(&xml).unwrap();
     }
+
+    // Fails as a individual test but passes when part of complete file...
+    // #[test]
+    // fn test_chords() {
+    //   let xml = r#"
+    //   <measure number="40">
+    //     <harmony>
+    //       <root>
+    //         <root-step>C</root-step>
+    //         <root-alter>0</root-alter>
+    //       </root>
+    //       <kind>major</kind>
+    //       <frame>
+    //         <frame-strings>6</frame-strings>
+    //         <frame-frets>5</frame-frets>
+    //         <first-fret>1</first-fret>
+    //         <frame-note>
+    //           <string>5</string>
+    //           <fret>3</fret>
+    //         </frame-note>
+    //         <frame-note>
+    //           <string>4</string>
+    //           <fret>5</fret>
+    //         </frame-note>
+    //         <frame-note>
+    //           <string>3</string>
+    //           <fret>5</fret>
+    //         </frame-note>
+    //         <frame-note>
+    //           <string>2</string>
+    //           <fret>5</fret>
+    //         </frame-note>
+    //       </frame>
+    //     </harmony>
+    //     <direction>
+    //       <direction-type>
+    //       <dynamics>
+    //         <mf/>
+    //       </dynamics>
+    //       </direction-type>
+    //     </direction>
+    //     <direction>
+    //       <direction-type>
+    //       <rehearsal enclosure="rectangle">B Vers</rehearsal>
+    //       </direction-type>
+    //     </direction>
+    //     <note>
+    //       <pitch>
+    //       <step>C</step>
+    //       <octave>4</octave>
+    //       </pitch>
+    //       <duration>2</duration>
+    //       <voice>1</voice>
+    //       <type>half</type>
+    //       <stem>up</stem>
+    //       <notations>
+    //       <technical>
+    //         <string>3</string>
+    //         <fret>5</fret>
+    //       </technical>
+    //   <?GP <root><brush type="down"/></root>?>
+    //       </notations>
+    //     </note>
+    //     <direction>
+    //       <direction-type>
+    //       <dynamics>
+    //         <mf/>
+    //       </dynamics>
+    //       </direction-type>
+    //     </direction>
+    //     <note>
+    //       <chord/>
+    //       <pitch>
+    //       <step>C</step>
+    //       <octave>3</octave>
+    //       </pitch>
+    //       <duration>2</duration>
+    //       <voice>1</voice>
+    //       <type>half</type>
+    //       <stem>up</stem>
+    //       <notations>
+    //       <technical>
+    //         <string>5</string>
+    //         <fret>3</fret>
+    //       </technical>
+    //   <?GP <root><brush type="down"/></root>?>
+    //       </notations>
+    //     </note>
+    //     <direction>
+    //       <direction-type>
+    //       <dynamics>
+    //         <mf/>
+    //       </dynamics>
+    //       </direction-type>
+    //     </direction>
+    //     <note>
+    //       <chord/>
+    //       <pitch>
+    //       <step>G</step>
+    //       <octave>3</octave>
+    //       </pitch>
+    //       <duration>2</duration>
+    //       <voice>1</voice>
+    //       <type>half</type>
+    //       <stem>up</stem>
+    //       <notations>
+    //       <technical>
+    //         <string>4</string>
+    //         <fret>5</fret>
+    //       </technical>
+    //   <?GP <root><brush type="down"/></root>?>
+    //       </notations>
+    //     </note>
+    //     <direction>
+    //       <direction-type>
+    //       <dynamics>
+    //         <mf/>
+    //       </dynamics>
+    //       </direction-type>
+    //     </direction>
+    //     <note>
+    //       <chord/>
+    //       <pitch>
+    //       <step>E</step>
+    //       <octave>4</octave>
+    //       </pitch>
+    //       <duration>2</duration>
+    //       <voice>1</voice>
+    //       <type>half</type>
+    //       <stem>up</stem>
+    //       <notations>
+    //       <technical>
+    //         <string>2</string>
+    //         <fret>5</fret>
+    //       </technical>
+    //   <?GP <root><brush type="down"/></root>?>
+    //       </notations>
+    //     </note>
+    //     <harmony>
+    //       <root>
+    //       <root-step>F</root-step>
+    //       <root-alter>0</root-alter>
+    //       </root>
+    //       <kind>major</kind>
+    //       <frame>
+    //       <frame-strings>6</frame-strings>
+    //       <frame-frets>5</frame-frets>
+    //       <first-fret>8</first-fret>
+    //       <frame-note>
+    //         <string>5</string>
+    //         <fret>8</fret>
+    //       </frame-note>
+    //       <frame-note>
+    //         <string>4</string>
+    //         <fret>10</fret>
+    //       </frame-note>
+    //       <frame-note>
+    //         <string>3</string>
+    //         <fret>10</fret>
+    //       </frame-note>
+    //       <frame-note>
+    //         <string>2</string>
+    //         <fret>10</fret>
+    //       </frame-note>
+    //       </frame>
+    //     </harmony>
+    //     <note>
+    //       <pitch>
+    //       <step>F</step>
+    //       <octave>3</octave>
+    //       </pitch>
+    //       <duration>2</duration>
+    //       <tie type="start"/>
+    //       <voice>1</voice>
+    //       <type>half</type>
+    //       <stem>up</stem>
+    //       <notations>
+    //       <technical>
+    //         <string>5</string>
+    //         <fret>8</fret>
+    //       </technical>
+    //   <?GP <root><brush type="up"/></root>?>
+    //       <tied type="start"/>
+    //       </notations>
+    //     </note>
+    //     <note>
+    //       <chord/>
+    //       <pitch>
+    //       <step>C</step>
+    //       <octave>4</octave>
+    //       </pitch>
+    //       <duration>2</duration>
+    //       <tie type="start"/>
+    //       <voice>1</voice>
+    //       <type>half</type>
+    //       <stem>up</stem>
+    //       <notations>
+    //       <technical>
+    //         <string>4</string>
+    //         <fret>10</fret>
+    //       </technical>
+    //   <?GP <root><brush type="up"/></root>?>
+    //       <tied type="start"/>
+    //       </notations>
+    //     </note>
+    //     <note>
+    //       <chord/>
+    //       <pitch>
+    //       <step>F</step>
+    //       <octave>4</octave>
+    //       </pitch>
+    //       <duration>2</duration>
+    //       <tie type="start"/>
+    //       <voice>1</voice>
+    //       <type>half</type>
+    //       <stem>up</stem>
+    //       <notations>
+    //       <technical>
+    //         <string>3</string>
+    //         <fret>10</fret>
+    //       </technical>
+    //   <?GP <root><brush type="up"/></root>?>
+    //       <tied type="start"/>
+    //       </notations>
+    //     </note>
+    //     <note>
+    //       <chord/>
+    //       <pitch>
+    //       <step>A</step>
+    //       <octave>4</octave>
+    //       </pitch>
+    //       <duration>2</duration>
+    //       <tie type="start"/>
+    //       <voice>1</voice>
+    //       <type>half</type>
+    //       <stem>up</stem>
+    //       <notations>
+    //       <technical>
+    //         <string>2</string>
+    //         <fret>10</fret>
+    //       </technical>
+    //   <?GP <root><brush type="up"/></root>?>
+    //       <tied type="start"/>
+    //       </notations>
+    //     </note>
+    //     <barline location="left">
+    //       <repeat direction="forward" times="2"/>
+    //     </barline>
+    //   </measure>
+    //   "#;
+
+    //   let item : Harmony = from_str(xml).unwrap();
+
+    // }
 }

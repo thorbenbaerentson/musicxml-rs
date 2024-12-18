@@ -430,4 +430,51 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn harmony_3() {
+        let xml = r#"
+            <harmony>
+                <root>
+                    <root-step>C</root-step>
+                    <root-alter>0</root-alter>
+                </root>
+                <kind>major</kind>
+                <frame>
+                    <frame-strings>6</frame-strings>
+                    <frame-frets>5</frame-frets>
+                    <first-fret>1</first-fret>
+                    <frame-note>
+                        <string>5</string>
+                        <fret>3</fret>
+                    </frame-note>
+                    <frame-note>
+                        <string>4</string>
+                        <fret>5</fret>
+                    </frame-note>
+                        <frame-note>
+                        <string>3</string>
+                        <fret>5</fret>
+                    </frame-note>
+                    <frame-note>
+                        <string>2</string>
+                        <fret>5</fret>
+                    </frame-note>
+                </frame>
+            </harmony>
+        "#;
+        let item : Harmony = from_str(xml).unwrap();
+
+        match &item.items[0] {
+            HarmonyItem::Root(root) => {
+                assert_eq!(root.step.content, Step::C);
+                assert_eq!(root.alter.clone().unwrap().content, 0);
+            },
+            _ => {
+                panic!("Expected different item");
+            }
+        }
+
+
+    }
 }

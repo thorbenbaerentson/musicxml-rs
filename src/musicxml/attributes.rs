@@ -76,8 +76,8 @@ pub struct Time {
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, PartialOrd, Clone)]
 pub struct Clef {
-    #[serde(default = "char::default")]
-    pub sign: char,
+    #[serde(default = "String::default")]
+    pub sign: String,
 
     #[serde(default = "i8::default")]
     pub line: i8,
@@ -140,7 +140,7 @@ mod tests {
         assert_eq!(time.beat_type, 4);
 
         let clef = attribs.clef.unwrap();
-        assert_eq!(clef.sign, 'G');
+        assert_eq!(clef.sign, "G");
         assert_eq!(clef.line, 2);
         assert_eq!(clef.number, 1);
     }

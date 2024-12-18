@@ -6,6 +6,7 @@ use crate::musicxml::{
 };
 use crate::prelude::*;
 
+use super::part::Part;
 use super::part_list::PartList;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -25,8 +26,8 @@ pub struct ScorePartwise {
     #[serde(rename = "part-list", default = "PartList::default")]
     pub part_list: PartList,
 
-    // #[serde(rename = "part", default = "Vec::default")]
-    // pub parts: Vec<ScorePart>,
+    #[serde(rename = "part", default = "Vec::default")]
+    pub parts: Vec<Part>,
 
     #[serde(default = "Option::default")]
     pub identification: Option<Identification>,
@@ -40,7 +41,7 @@ pub struct ScorePartwise {
 
 #[cfg(test)]
 mod tests {
-    use crate::musicxml::part_list::PartListContent;
+    use crate::musicxml::{part_list::PartListContent, score_part::ScorePartContent};
 
     use super::ScorePartwise;
     use serde_xml_rs::from_str;
@@ -127,5 +128,36 @@ mod tests {
     fn my_bonnie_2() {
         let xml = fs::read_to_string("resources/xml-test-files/my_bonnie.xml").unwrap();
         let item: ScorePartwise = from_str(&xml).unwrap();
+
+        let part_list = item.part_list;
+        assert_eq!(part_list.parts.len(), 7);
+
+        match &part_list.parts[0] {
+            PartListContent::ScorePart(score_part) => {
+                match &score_part.content[0] {
+                    ScorePartContent::PartName(p) => {
+                        assert_eq!(p, &"Drumkit".to_string());
+                    },
+                    _=> { }
+                }
+                match &score_part.content[1] {
+                    ScorePartContent::PartAbbreviation(p) => {
+                        assert_eq!(p, &"drm.".to_string());
+                    },
+                    _=> { }
+                }
+            },
+            _ => {
+                panic!("");
+            }
+        }
+
+        let parts = item.parts;
+        assert_eq!(parts.len(), 7);
+
+        let bass = &parts[2];
+        assert_eq!(bass.id, "P3".to_string());
+        assert_eq!(bass.measures.len(), 80);        
+
     }
 }

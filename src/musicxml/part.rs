@@ -7,6 +7,6 @@ pub struct Part {
     #[serde(default = "String::default")]
     pub id: String,
 
-    #[serde(default = "Vec::default")]
+    #[serde(rename = "measure", default = "Vec::default")]
     pub measures: Vec<Measure>,
 }
