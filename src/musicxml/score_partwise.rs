@@ -115,9 +115,17 @@ mod tests {
         let item: ScorePartwise = from_str(&xml).unwrap();        
     }
 
+    // This is an export from MuseScore.
     #[test]
     fn my_bonnie() {
         let xml = fs::read_to_string("resources/xml-test-files/my_bonnie.musicxml").unwrap();
+        let item: ScorePartwise = from_str(&xml).unwrap();
+    }
+
+    // This is an export form Guitar Pro 8
+    #[test]
+    fn my_bonnie_2() {
+        let xml = fs::read_to_string("resources/xml-test-files/my_bonnie.xml").unwrap();
         let item: ScorePartwise = from_str(&xml).unwrap();
     }
 }
